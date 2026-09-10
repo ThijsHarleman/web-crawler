@@ -2,5 +2,13 @@ spring:
   application:
     name: web-crawler
 
+  datasource:
+    url: jdbc:sqlite:./data/crawler.db
+    driver-class-name: org.sqlite.JDBC
+
+  sql:
+    init:
+      mode: always
+
 server:
   port: 8080
