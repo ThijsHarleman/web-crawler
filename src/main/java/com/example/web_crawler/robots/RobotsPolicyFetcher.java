@@ -8,16 +8,18 @@ import org.springframework.stereotype.Component;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Component
-public class RobotsPolicyFetcher {
+public class RobotsPolicyFetcher implements RobotsPolicyProvider {
     private final PageFetcher pageFetcher;
 
     public RobotsPolicyFetcher(PageFetcher pageFetcher) {
         this.pageFetcher = pageFetcher;
     }
 
-    public RobotsPolicy fetch(URI pageUri) {
+    @Override
+    public RobotsPolicy getPolicy(URI pageUri) {
         URI robotsUri = buildRobotsUri(pageUri);
 
         FetchResult result;
@@ -133,7 +135,7 @@ public class RobotsPolicyFetcher {
             String directive = trimmed
                 .substring(0, separatorIndex)
                 .trim()
-                .toLowerCase();
+                .toLowerCase(Locale.ROOT);
 
             String value = trimmed
                 .substring(separatorIndex + 1)
@@ -154,7 +156,7 @@ public class RobotsPolicyFetcher {
                 }
 
                 if (!value.isEmpty()) {
-                    userAgents.add(value.toLowerCase());
+                    userAgents.add(value.toLowerCase(Locale.ROOT));
                 }
 
                 continue;
@@ -202,7 +204,7 @@ public class RobotsPolicyFetcher {
     }
 
     private RobotsGroup selectGroup(List<RobotsGroup> groups) {
-        String crawlerUserAgent = RobotsConstants.USER_AGENT.toLowerCase();
+        String crawlerUserAgent = RobotsConstants.USER_AGENT.toLowerCase(Locale.ROOT);
 
         for (RobotsGroup group : groups) {
             if (group.userAgents().contains(crawlerUserAgent)) {

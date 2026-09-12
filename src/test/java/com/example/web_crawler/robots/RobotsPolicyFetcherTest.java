@@ -35,7 +35,7 @@ class RobotsPolicyFetcherTest {
 
         RobotsPolicyFetcher fetcher = new RobotsPolicyFetcher(pageFetcher);
 
-        RobotsPolicy policy = fetcher.fetch(
+        RobotsPolicy policy = fetcher.getPolicy(
             URI.create("https://example.com/page")
         );
 
@@ -68,7 +68,7 @@ class RobotsPolicyFetcherTest {
 
         RobotsPolicyFetcher fetcher = new RobotsPolicyFetcher(pageFetcher);
 
-        RobotsPolicy policy = fetcher.fetch(
+        RobotsPolicy policy = fetcher.getPolicy(
             URI.create("https://example.com/page")
         );
 
@@ -97,7 +97,7 @@ class RobotsPolicyFetcherTest {
 
         RobotsPolicyFetcher fetcher = new RobotsPolicyFetcher(pageFetcher);
 
-        RobotsPolicy policy = fetcher.fetch(
+        RobotsPolicy policy = fetcher.getPolicy(
             URI.create("https://example.com/page")
         );
 
@@ -134,7 +134,7 @@ class RobotsPolicyFetcherTest {
 
         RobotsPolicyFetcher fetcher = new RobotsPolicyFetcher(pageFetcher);
 
-        RobotsPolicy policy = fetcher.fetch(
+        RobotsPolicy policy = fetcher.getPolicy(
             URI.create("https://example.com/page")
         );
 
@@ -159,7 +159,7 @@ class RobotsPolicyFetcherTest {
 
         RobotsPolicyFetcher fetcher = new RobotsPolicyFetcher(pageFetcher);
 
-        RobotsPolicy policy = fetcher.fetch(
+        RobotsPolicy policy = fetcher.getPolicy(
             URI.create("https://example.com/page")
         );
 
@@ -188,7 +188,7 @@ class RobotsPolicyFetcherTest {
         RobotsPolicyFetcher fetcher =
             new RobotsPolicyFetcher(pageFetcher);
 
-        fetcher.fetch(
+        fetcher.getPolicy(
             URI.create(
                 "https://username:password@example.com/page"
             )
@@ -211,7 +211,7 @@ class RobotsPolicyFetcherTest {
 
         RobotsPolicyFetcher fetcher = new RobotsPolicyFetcher(pageFetcher);
 
-        RobotsPolicy policy = fetcher.fetch(
+        RobotsPolicy policy = fetcher.getPolicy(
             URI.create("https://example.com/page")
         );
 
@@ -246,7 +246,7 @@ class RobotsPolicyFetcherTest {
 
         RobotsPolicyFetcher fetcher = new RobotsPolicyFetcher(pageFetcher);
 
-        RobotsPolicy policy = fetcher.fetch(
+        RobotsPolicy policy = fetcher.getPolicy(
             URI.create("https://example.com/page")
         );
 
@@ -275,7 +275,7 @@ class RobotsPolicyFetcherTest {
 
         RobotsPolicyFetcher fetcher = new RobotsPolicyFetcher(pageFetcher);
 
-        RobotsPolicy policy = fetcher.fetch(
+        RobotsPolicy policy = fetcher.getPolicy(
             URI.create("https://example.com/page")
         );
 
@@ -312,7 +312,7 @@ class RobotsPolicyFetcherTest {
 
         RobotsPolicyFetcher fetcher = new RobotsPolicyFetcher(pageFetcher);
 
-        RobotsPolicy policy = fetcher.fetch(
+        RobotsPolicy policy = fetcher.getPolicy(
             URI.create("https://example.com/page")
         );
 
