@@ -12,3 +12,7 @@ spring:
 
 server:
   port: 8080
+
+crawler:
+  rate-limit:
+    minimum-delay: 1s

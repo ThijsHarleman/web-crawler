@@ -6,3 +6,7 @@ spring:
   sql:
     init:
       mode: always
+
+crawler:
+  rate-limit:
+    minimum-delay: 1s

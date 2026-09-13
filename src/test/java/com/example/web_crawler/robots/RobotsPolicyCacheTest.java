@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 class RobotsPolicyCacheTest {
     @Test
     void fetchesRobotsPolicyOnlyOncePerOrigin() {
-
         AtomicInteger fetchCount = new AtomicInteger();
 
         RobotsPolicy expectedPolicy = new SimpleRobotsPolicy(List.of());
