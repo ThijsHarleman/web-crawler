@@ -8,6 +8,7 @@ import com.example.web_crawler.model.CrawlStatus;
 import com.example.web_crawler.model.Page;
 import com.example.web_crawler.model.PageStatus;
 import com.example.web_crawler.parser.HtmlPageParser;
+import com.example.web_crawler.repository.CrawlRepository;
 import com.example.web_crawler.repository.PageRepository;
 import com.example.web_crawler.robots.RobotsPolicyProvider;
 import com.example.web_crawler.robots.SimpleRobotsPolicy;
@@ -29,6 +30,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class BreadthFirstCrawlerTest {
     private static final Instant START_TIME =
         Instant.parse("2026-01-01T00:00:00Z");
+
+    private InMemoryCrawlRepository crawlRepository = 
+        new InMemoryCrawlRepository();
 
     private InMemoryPageRepository pageRepository =
         new InMemoryPageRepository();
@@ -399,6 +403,7 @@ class BreadthFirstCrawlerTest {
 
     private BreadthFirstCrawler createCrawler() {
         return new BreadthFirstCrawler(
+            crawlRepository,
             pageRepository,
             robotsPolicyProvider,
             pageFetcher,
@@ -440,6 +445,23 @@ class BreadthFirstCrawlerTest {
             "text/html",
             body
         );
+    }
+
+    private static class InMemoryCrawlRepository implements CrawlRepository {
+        private final List<Crawl> savedCrawls = new ArrayList<>();
+
+        @Override
+        public Crawl save(Crawl crawl) {
+            savedCrawls.add(crawl);
+            return crawl;
+        }
+
+        @Override
+        public Optional<Crawl> findById(long id) {
+            return savedCrawls.stream()
+                .filter(crawl -> crawl.getId() == id)
+                .findFirst();
+        }
     }
 
     private static class InMemoryPageRepository implements PageRepository {

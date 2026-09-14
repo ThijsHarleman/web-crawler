@@ -47,6 +47,7 @@ public class CrawlerConfiguration {
 
     @Bean
     public CrawlerFactory crawlerFactory(
+        CrawlRepository crawlRepository,
         PageRepository pageRepository,
         RobotsPolicyFetcher robotsPolicyFetcher,
         PageFetcher pageFetcher,
@@ -55,6 +56,7 @@ public class CrawlerConfiguration {
         Clock clock
     ) {
         return new BreadthFirstCrawlerFactory(
+            crawlRepository,
             pageRepository,
             robotsPolicyFetcher,
             pageFetcher,

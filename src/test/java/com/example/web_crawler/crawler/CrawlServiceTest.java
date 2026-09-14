@@ -56,6 +56,7 @@ class CrawlServiceTest {
 
         BreadthFirstCrawlerFactory crawlerFactory =
             new BreadthFirstCrawlerFactory(
+                crawlRepository,
                 pageRepository,
                 robotsPolicyFetcher,
                 pageFetcher,
@@ -88,7 +89,7 @@ class CrawlServiceTest {
         );
 
         assertEquals(
-            2,
+            3,
             crawlRepository.getSaveCount()
         );
 
@@ -122,6 +123,7 @@ class CrawlServiceTest {
 
         BreadthFirstCrawlerFactory crawlerFactory =
             new BreadthFirstCrawlerFactory(
+                crawlRepository,
                 pageRepository,
                 robotsPolicyFetcher,
                 pageFetcher,
@@ -183,6 +185,7 @@ class CrawlServiceTest {
 
         BreadthFirstCrawlerFactory crawlerFactory =
             new BreadthFirstCrawlerFactory(
+                crawlRepository,
                 pageRepository,
                 robotsPolicyFetcher,
                 pageFetcher,
@@ -266,6 +269,7 @@ class CrawlServiceTest {
 
         BreadthFirstCrawlerFactory crawlerFactory =
             new BreadthFirstCrawlerFactory(
+                crawlRepository,
                 pageRepository,
                 robotsPolicyFetcher,
                 pageFetcher,

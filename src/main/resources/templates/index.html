@@ -3,15 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Crawler</title>
+
+    <title>Educational Web Crawler</title>
 </head>
+
 <body>
 
-<h1>Web Crawler</h1>
+<main>
+    <h1>Educational Web Crawler</h1>
 
-<p>
-    The application is running.
-</p>
+    <p>Enter a starting URL and configure the crawl.</p>
+
+    <form id="crawl-form">
+        <div>
+            <label for="start-url">Start URL</label>
+
+            <input
+                id="start-url"
+                name="startUrl"
+                type="url"
+                placeholder="https://example.com/"
+                required
+            >
+        </div>
+
+        <div>
+            <label for="max-depth">Maximum depth</label>
+
+            <input
+                id="max-depth"
+                name="maxDepth"
+                type="number"
+                min="0"
+                value="2"
+                required
+            >
+        </div>
+
+        <div>
+            <label for="max-duration">Maximum duration (seconds)</label>
+
+            <input
+                id="max-duration"
+                name="maxDurationSeconds"
+                type="number"
+                min="1"
+                value="60"
+                required
+            >
+        </div>
+
+        <button type="submit">Start Crawl</button>
+    </form>
+
+    <section id="crawl-status">
+        <h2>Crawl Status</h2>
+
+        <p>No crawl has been started.</p>
+    </section>
+
+    <script src="/js/crawl.js"></script>
+</main>
 
 </body>
 </html>

@@ -9,6 +9,7 @@ import com.example.web_crawler.model.Page;
 import com.example.web_crawler.model.PageStatus;
 import com.example.web_crawler.parser.HtmlPageParser;
 import com.example.web_crawler.parser.ParsedPage;
+import com.example.web_crawler.repository.CrawlRepository;
 import com.example.web_crawler.repository.PageRepository;
 import com.example.web_crawler.robots.RobotsPolicyProvider;
 import com.example.web_crawler.url.UrlNormalizer;
@@ -21,16 +22,23 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Queue;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BreadthFirstCrawler {
+    private final CrawlRepository crawlRepository;
     private final PageRepository pageRepository;
     private final RobotsPolicyProvider robotsPolicyProvider;
     private final PageFetcher pageFetcher;
     private final HtmlPageParser pageParser;
     private final UrlNormalizer urlNormalizer;
     private final Clock clock;
+    private static final Logger logger = LoggerFactory.getLogger(
+        BreadthFirstCrawler.class
+    );
 
     public BreadthFirstCrawler(
+        CrawlRepository crawlRepository,
         PageRepository pageRepository,
         RobotsPolicyProvider robotsPolicyProvider,
         PageFetcher pageFetcher,
@@ -38,6 +46,7 @@ public class BreadthFirstCrawler {
         UrlNormalizer urlNormalizer,
         Clock clock
     ) {
+        this.crawlRepository = crawlRepository;
         this.pageRepository = pageRepository;
         this.robotsPolicyProvider = robotsPolicyProvider;
         this.pageFetcher = pageFetcher;
@@ -50,6 +59,14 @@ public class BreadthFirstCrawler {
         Instant startedAt = clock.instant();
 
         crawl.start(startedAt);
+
+        crawlRepository.save(crawl);
+
+        logger.info(
+            "Crawl {} started: {}",
+            crawl.getId(),
+            crawl.getStartUrl()
+        );
 
         Instant deadline = startedAt.plus(
             crawl.getMaxDuration()
@@ -72,6 +89,11 @@ public class BreadthFirstCrawler {
                     crawl.stop(
                         clock.instant()
                     );
+
+                    logger.info(
+                        "Crawl {} stopped because the maximum duration was reached",
+                        crawl.getId()
+                    );
                     return;
                 }
 
@@ -80,6 +102,13 @@ public class BreadthFirstCrawler {
                 if (!visited.add(target.uri())) {
                     continue;
                 }
+
+                logger.info(
+                    "Crawl {} processing {} at depth {}",
+                    crawl.getId(),
+                    target.uri(),
+                    target.depth()
+                );
 
                 Page page = new Page(
                     0,
@@ -108,6 +137,12 @@ public class BreadthFirstCrawler {
                     .getPolicy(target.uri())
                     .isAllowed(target.uri())) {
 
+                    logger.info(
+                        "Crawl {} blocked by robots.txt: {}",
+                        crawl.getId(),
+                        target.uri()
+                    );
+
                     savedPage.markBlockedByRobots();
 
                     pageRepository.save(savedPage);
@@ -120,6 +155,13 @@ public class BreadthFirstCrawler {
                 try {
                     fetchResult = pageFetcher.fetch(target.uri());
                 } catch (PageFetchException exception) {
+                    logger.warn(
+                        "Crawl {} failed to fetch {}: {}",
+                        crawl.getId(),
+                        target.uri(),
+                        exception.getMessage()
+                    );
+
                     savedPage.markFailed(
                         exception.getMessage()
                     );
@@ -144,6 +186,13 @@ public class BreadthFirstCrawler {
 
                 pageRepository.save(savedPage);
 
+                logger.info(
+                    "Crawl {} crawled {} (HTTP {})",
+                    crawl.getId(),
+                    target.uri(),
+                    fetchResult.statusCode()
+                );
+
                 for (String link : parsedPage.links()) {
                     URI normalizedUri =
                         urlNormalizer.normalize(
@@ -167,6 +216,11 @@ public class BreadthFirstCrawler {
                     );
                 }
             }
+
+            logger.info(
+                "Crawl {} completed",
+                crawl.getId()
+            );
 
             crawl.complete(
                 clock.instant()
