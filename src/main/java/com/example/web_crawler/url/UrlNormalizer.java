@@ -1,9 +1,12 @@
 package com.example.web_crawler.url;
 
+import org.springframework.stereotype.Component;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Locale;
 
+@Component 
 public class UrlNormalizer {
     public URI normalize(URI baseUri, String link) {
         if (link == null || link.isBlank()) {
