@@ -4,4 +4,6 @@ import java.util.Set;
 
 public interface StopWordProvider {
     Set<String> getStopWords(String language);
+
+    Set<String> getUniversalStopWords();
 }

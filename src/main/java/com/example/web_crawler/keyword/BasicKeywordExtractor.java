@@ -31,7 +31,9 @@ public class BasicKeywordExtractor implements KeywordExtractor {
             return Map.of();
         }
 
-        Set<String> stopWords = stopWordProvider.getStopWords(language);
+        Set<String> languageStopWords = stopWordProvider.getStopWords(language);
+
+        Set<String> universalStopWords = stopWordProvider.getUniversalStopWords();
 
         Map<String, Integer> frequencies = new HashMap<>();
 
@@ -52,7 +54,11 @@ public class BasicKeywordExtractor implements KeywordExtractor {
                 continue;
             }
 
-            if (stopWords.contains(word)) {
+            if (languageStopWords.contains(word)) {
+                continue;
+            }
+
+            if (universalStopWords.contains(word)) {
                 continue;
             }
 

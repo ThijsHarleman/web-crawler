@@ -23,7 +23,17 @@ class KeywordAnalysisServiceTest {
         InMemoryPageKeywordRepository pageKeywordRepository = 
             new InMemoryPageKeywordRepository();
         
-        StopWordProvider stopWordProvider = language -> Set.of();
+        StopWordProvider stopWordProvider = new StopWordProvider() {
+            @Override
+            public Set<String> getStopWords(String language) {
+                return Set.of();
+            }
+
+            @Override
+            public Set<String> getUniversalStopWords() {
+                return Set.of();
+            }
+        };
 
         KeywordAnalysisService service = new DefaultKeywordAnalysisService(
             new BasicKeywordExtractor(stopWordProvider),
@@ -75,7 +85,17 @@ class KeywordAnalysisServiceTest {
         InMemoryPageKeywordRepository pageKeywordRepository = 
             new InMemoryPageKeywordRepository();
         
-        StopWordProvider stopWordProvider = language -> Set.of();
+        StopWordProvider stopWordProvider = new StopWordProvider() {
+            @Override
+            public Set<String> getStopWords(String language) {
+                return Set.of();
+            }
+
+            @Override
+            public Set<String> getUniversalStopWords() {
+                return Set.of();
+            }
+        };
 
         KeywordAnalysisService service = new DefaultKeywordAnalysisService(
             new BasicKeywordExtractor(stopWordProvider),

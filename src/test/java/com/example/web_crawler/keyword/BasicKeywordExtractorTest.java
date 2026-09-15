@@ -10,11 +10,23 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BasicKeywordExtractorTest {
-    private final StopWordProvider stopWordProvider = language -> Set.of(
-        "the",
-        "and",
-        "is"
-    );
+    private final StopWordProvider stopWordProvider = new StopWordProvider() {
+        @Override
+        public Set<String> getStopWords(String language) {
+            return Set.of(
+                "the",
+                "and",
+                "is"
+            );
+        }
+
+        @Override
+        public Set<String> getUniversalStopWords() {
+            return Set.of(
+                "universal"
+            );
+        }
+    };
 
     private final BasicKeywordExtractor extractor = new BasicKeywordExtractor(
         stopWordProvider
@@ -141,5 +153,25 @@ class BasicKeywordExtractorTest {
         assertEquals(2, result.get("gpt4"));
         assertEquals(1, result.get("html5"));
         assertEquals(1, result.get("ipv6"));
+    }
+
+    @Test
+    void ignoresUniversalStopWords() {
+        Map<String, Integer> result = extractor.extract(
+            "universal universal important important keyword",
+            "de"
+        );
+
+        assertFalse(result.containsKey("universal"));
+
+        assertEquals(
+            2,
+            result.get("important")
+        );
+
+        assertEquals(
+            1,
+            result.get("keyword")
+        );
     }
 }
