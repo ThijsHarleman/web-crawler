@@ -54,3 +54,16 @@ th {
 td:last-child {
     overflow-wrap: anywhere;
 }
+
+#keyword-results {
+    margin-bottom: 3rem;
+}
+
+#keyword-results button {
+    border: none;
+    background: none;
+    padding: 0;
+    text-align: left;
+    cursor: pointer;
+    text-decoration: underline;
+}

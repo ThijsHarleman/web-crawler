@@ -3,6 +3,7 @@ package com.example.web_crawler.crawler;
 import com.example.web_crawler.fetch.FetchResult;
 import com.example.web_crawler.fetch.PageFetcher;
 import com.example.web_crawler.fetch.PageFetchException;
+import com.example.web_crawler.keyword.KeywordAnalysisService;
 import com.example.web_crawler.model.Crawl;
 import com.example.web_crawler.model.CrawlTarget;
 import com.example.web_crawler.model.Page;
@@ -32,6 +33,7 @@ public class BreadthFirstCrawler {
     private final PageFetcher pageFetcher;
     private final HtmlPageParser pageParser;
     private final UrlNormalizer urlNormalizer;
+    private final KeywordAnalysisService keywordAnalysisService;
     private final Clock clock;
     private static final Logger logger = LoggerFactory.getLogger(
         BreadthFirstCrawler.class
@@ -44,6 +46,7 @@ public class BreadthFirstCrawler {
         PageFetcher pageFetcher,
         HtmlPageParser pageParser,
         UrlNormalizer urlNormalizer,
+        KeywordAnalysisService keywordAnalysisService,
         Clock clock
     ) {
         this.crawlRepository = crawlRepository;
@@ -52,6 +55,7 @@ public class BreadthFirstCrawler {
         this.pageFetcher = pageFetcher;
         this.pageParser = pageParser;
         this.urlNormalizer = urlNormalizer;
+        this.keywordAnalysisService = keywordAnalysisService;
         this.clock = clock;
     }
 
@@ -185,6 +189,23 @@ public class BreadthFirstCrawler {
                 );
 
                 pageRepository.save(savedPage);
+
+                logger.info(
+                    "Starting keyword analysis for page {} ({})",
+                    savedPage.getId(),
+                    savedPage.getUri()
+                );
+
+                keywordAnalysisService.analyze(
+                    savedPage.getId(),
+                    parsedPage.text()
+                );
+
+                logger.info(
+                    "Finished keyword analysis for page {} ({})",
+                    savedPage.getId(),
+                    savedPage.getUri()
+                );
 
                 logger.info(
                     "Crawl {} crawled {} (HTTP {})",

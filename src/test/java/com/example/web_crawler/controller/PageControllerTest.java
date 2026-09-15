@@ -4,9 +4,12 @@ import com.example.web_crawler.crawler.CrawlExecutor;
 import com.example.web_crawler.crawler.CrawlService;
 import com.example.web_crawler.model.Crawl;
 import com.example.web_crawler.model.CrawlStatus;
+import com.example.web_crawler.model.Keyword;
 import com.example.web_crawler.model.Page;
+import com.example.web_crawler.model.PageKeyword;
 import com.example.web_crawler.model.PageStatus;
 import com.example.web_crawler.repository.CrawlRepository;
+import com.example.web_crawler.repository.PageKeywordRepository;
 import com.example.web_crawler.repository.PageRepository;
 
 import org.junit.jupiter.api.Test;
@@ -24,6 +27,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -43,6 +48,9 @@ class PageControllerTest {
 
     @MockitoBean
     private PageRepository pageRepository;
+
+    @MockitoBean
+    private PageKeywordRepository pageKeywordRepository;
 
     @Test
     void servesIndexPage() throws Exception {
@@ -168,5 +176,92 @@ class PageControllerTest {
 
         mockMvc.perform(get("/api/crawls/{id}/pages", crawlId))
             .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void returnsKeywordsForExistingPage() throws Exception {
+        Page page = new Page(
+            1,
+            1,
+            URI.create("https://example.com"),
+            0,
+            PageStatus.CRAWLED,
+            200,
+            "Example",
+            Instant.parse("2026-01-01T00:00:00Z"),
+            Instant.parse("2026-01-01T00:00:01Z"),
+            null
+        );
+
+        Keyword keyword = new Keyword(
+            1,
+            "java"
+        );
+
+        PageKeyword pageKeyword = new PageKeyword(
+            1,
+            keyword,
+            3,
+            0.5
+        );
+
+        when(pageRepository.findById(1))
+            .thenReturn(Optional.of(page));
+
+        when(pageKeywordRepository.findByPageId(1))
+            .thenReturn(List.of(pageKeyword));
+
+        mockMvc.perform(
+            get("/api/pages/1/keywords")
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].pageId").value(1))
+        .andExpect(jsonPath("$[0].keyword.id").value(1))
+        .andExpect(jsonPath("$[0].keyword.word").value("java"))
+        .andExpect(jsonPath("$[0].frequency").value(3))
+        .andExpect(jsonPath("$[0].score").value(0.5));
+    }
+
+    @Test
+    void returnsNotFoundForNonexistentPageKeywords() throws Exception {
+        when(pageRepository.findById(999))
+            .thenReturn(Optional.empty());
+
+        mockMvc.perform(
+            get("/api/pages/999/keywords")
+        )
+        .andExpect(status().isNotFound());
+
+        verify(pageKeywordRepository, never())
+            .findByPageId(999);
+    }
+
+    @Test
+    void returnsEmptyListWhenExistingPageHasNoKeywords() throws Exception {
+        Page page = new Page(
+            1,
+            1,
+            URI.create("https://example.com"),
+            0,
+            PageStatus.CRAWLED,
+            200,
+            "Example",
+            Instant.parse("2026-01-01T00:00:00Z"),
+            Instant.parse("2026-01-01T00:00:01Z"),
+            null
+        );
+
+        when(pageRepository.findById(1))
+            .thenReturn(Optional.of(page));
+
+        when(pageKeywordRepository.findByPageId(1))
+            .thenReturn(List.of());
+
+        mockMvc.perform(
+            get("/api/pages/1/keywords")
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$.length()").value(0));
     }
 }

@@ -3,6 +3,7 @@ package com.example.web_crawler.crawler;
 import com.example.web_crawler.fetch.FetchResult;
 import com.example.web_crawler.fetch.PageFetchException;
 import com.example.web_crawler.fetch.PageFetcher;
+import com.example.web_crawler.keyword.KeywordAnalysisService;
 import com.example.web_crawler.model.Crawl;
 import com.example.web_crawler.model.CrawlStatus;
 import com.example.web_crawler.model.Page;
@@ -26,6 +27,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 class BreadthFirstCrawlerTest {
     private static final Instant START_TIME =
@@ -46,6 +49,9 @@ class BreadthFirstCrawlerTest {
 
     private RobotsPolicyProvider robotsPolicyProvider =
         uri -> new SimpleRobotsPolicy(List.of());
+
+    private KeywordAnalysisService keywordAnalysisService = 
+        mock(KeywordAnalysisService.class);;
 
     private final MutableClock clock =
         new MutableClock(START_TIME);
@@ -401,6 +407,48 @@ class BreadthFirstCrawlerTest {
         );
     }
 
+    @Test
+    void analyzesSuccessfullyCrawledPage() {
+        URI startUri = URI.create("https://example.com/");
+
+        Crawl crawl = new Crawl(
+            1L,
+            startUri,
+            0,
+            Duration.ofSeconds(60),
+            CrawlStatus.NOT_STARTED,
+            null,
+            null
+        );
+
+        pageFetcher = uri -> new FetchResult(
+            uri,
+            200,
+            "text/html",
+            """
+            <html>
+                <head>
+                    <title>Example</title>
+                </head>
+                <body>
+                    Java Java Spring crawler
+                </body>
+            </html>
+            """
+        );
+
+        robotsPolicyProvider = uri -> target -> true;
+
+        BreadthFirstCrawler crawler = createCrawler();
+
+        crawler.crawl(crawl);
+
+        verify(keywordAnalysisService).analyze(
+            0L,
+            "Java Java Spring crawler"
+        );
+    }
+
     private BreadthFirstCrawler createCrawler() {
         return new BreadthFirstCrawler(
             crawlRepository,
@@ -409,6 +457,7 @@ class BreadthFirstCrawlerTest {
             pageFetcher,
             new HtmlPageParser(),
             new UrlNormalizer(),
+            keywordAnalysisService,
             clock
         );
     }

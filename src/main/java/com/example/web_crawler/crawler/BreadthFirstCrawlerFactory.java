@@ -1,6 +1,7 @@
 package com.example.web_crawler.crawler;
 
 import com.example.web_crawler.fetch.PageFetcher;
+import com.example.web_crawler.keyword.KeywordAnalysisService;
 import com.example.web_crawler.parser.HtmlPageParser;
 import com.example.web_crawler.repository.CrawlRepository;
 import com.example.web_crawler.repository.PageRepository;
@@ -16,6 +17,7 @@ public class BreadthFirstCrawlerFactory implements CrawlerFactory {
     private final RobotsPolicyFetcher robotsPolicyFetcher;
     private final PageFetcher pageFetcher;
     private final HtmlPageParser pageParser;
+    private final KeywordAnalysisService keywordAnalysisService;
     private final UrlNormalizer urlNormalizer;
     private final Clock clock;
 
@@ -26,6 +28,7 @@ public class BreadthFirstCrawlerFactory implements CrawlerFactory {
         PageFetcher pageFetcher,
         HtmlPageParser pageParser,
         UrlNormalizer urlNormalizer,
+        KeywordAnalysisService keywordAnalysisService,
         Clock clock
     ) {
         this.crawlRepository = crawlRepository;
@@ -34,6 +37,7 @@ public class BreadthFirstCrawlerFactory implements CrawlerFactory {
         this.pageFetcher = pageFetcher;
         this.pageParser = pageParser;
         this.urlNormalizer = urlNormalizer;
+        this.keywordAnalysisService = keywordAnalysisService;
         this.clock = clock;
     }
 
@@ -49,6 +53,7 @@ public class BreadthFirstCrawlerFactory implements CrawlerFactory {
             pageFetcher,
             pageParser,
             urlNormalizer,
+            keywordAnalysisService,
             clock
         );
     }

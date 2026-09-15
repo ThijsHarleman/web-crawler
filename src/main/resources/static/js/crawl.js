@@ -1,6 +1,7 @@
 const form = document.getElementById("crawl-form");
 const statusElement = document.getElementById("crawl-status");
 const resultsElement = document.getElementById("crawl-results");
+const keywordResultsElement = document.getElementById("keyword-results");
 
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -165,7 +166,7 @@ function renderCrawlPages(pages) {
         appendCell(row, page.status);
         appendCell(row, page.httpStatusCode ?? "");
         appendCell(row, page.title ?? "");
-        appendCell(row, page.uri);
+        appendPageLink(row, page);
         appendCell(row, page.errorMessage ?? "");
 
         tbody.appendChild(row);
@@ -179,4 +180,108 @@ function appendCell(row, value) {
     const cell = document.createElement("td");
     cell.textContent = value;
     row.appendChild(cell);
+}
+
+function appendPageLink(row, page) {
+    const cell = document.createElement("td");
+
+    const link = document.createElement("button");
+    link.type = "button";
+    link.textContent = page.uri;
+
+    link.addEventListener("click", () => {
+        loadPageKeywords(page.id);
+    });
+
+    cell.appendChild(link);
+    row.appendChild(cell);
+}
+
+async function loadPageKeywords(pageId) {
+    keywordResultsElement.innerHTML = `
+        <h2>Keyword Analysis</h2>
+        <p>Loading keywords...</p>
+    `;
+
+    try {
+        const response = await fetch(`/api/pages/${pageId}/keywords`);
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const keywords = await response.json();
+
+        renderPageKeywords(keywords);
+
+    } catch (error) {
+        keywordResultsElement.innerHTML = `
+            <h2>Keyword Analysis</h2>
+            <p>
+                Failed to load keywords:
+                ${error.message}
+            </p>
+        `;
+    }
+}
+
+function renderPageKeywords(keywords) {
+    keywordResultsElement.innerHTML = "";
+
+    const heading = document.createElement("h2");
+    heading.textContent = "Keyword Analysis";
+    keywordResultsElement.appendChild(heading);
+
+    if (keywords.length === 0) {
+        const message = document.createElement("p");
+        message.textContent = "No keywords found for this page.";
+        keywordResultsElement.appendChild(message);
+        return;
+    }
+
+    const table = document.createElement("table");
+
+    const thead = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+
+    const headers = [
+        "Keyword",
+        "Frequency",
+        "Score"
+    ];
+
+    for (const header of headers) {
+        const cell = document.createElement("th");
+        cell.textContent = header;
+        headerRow.appendChild(cell);
+    }
+
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+
+    for (const pageKeyword of keywords) {
+        const row = document.createElement("tr");
+
+        appendCell(
+            row,
+            pageKeyword.keyword.word
+        );
+
+        appendCell(
+            row,
+            pageKeyword.frequency
+        );
+
+        appendCell(
+            row,
+            pageKeyword.score.toFixed(4)
+        );
+
+        tbody.appendChild(row);
+    }
+
+    table.appendChild(tbody);
+    keywordResultsElement.appendChild(table);
 }

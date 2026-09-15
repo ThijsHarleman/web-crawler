@@ -31,6 +31,7 @@ class SingleCrawlExecutorTest {
             null,
             null,
             null,
+            null,
             null
         ) {
             @Override
@@ -75,6 +76,7 @@ class SingleCrawlExecutorTest {
         InMemoryCrawlRepository crawlRepository = new InMemoryCrawlRepository();
 
         CrawlerFactory crawlerFactory = () -> new BreadthFirstCrawler(
+            null,
             null,
             null,
             null,

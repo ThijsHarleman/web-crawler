@@ -7,6 +7,7 @@ import com.example.web_crawler.crawler.SingleCrawlExecutor;
 import com.example.web_crawler.fetch.HttpPageFetcher;
 import com.example.web_crawler.fetch.PageFetcher;
 import com.example.web_crawler.fetch.RateLimitedPageFetcher;
+import com.example.web_crawler.keyword.KeywordAnalysisService;
 import com.example.web_crawler.parser.HtmlPageParser;
 import com.example.web_crawler.ratelimit.DefaultRateLimiter;
 import com.example.web_crawler.ratelimit.RateLimiter;
@@ -53,6 +54,7 @@ public class CrawlerConfiguration {
         PageFetcher pageFetcher,
         HtmlPageParser pageParser,
         UrlNormalizer urlNormalizer,
+        KeywordAnalysisService keywordAnalysisService,
         Clock clock
     ) {
         return new BreadthFirstCrawlerFactory(
@@ -62,6 +64,7 @@ public class CrawlerConfiguration {
             pageFetcher,
             pageParser,
             urlNormalizer,
+            keywordAnalysisService,
             clock
         );
     }
