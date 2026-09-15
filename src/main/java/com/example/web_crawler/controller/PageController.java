@@ -2,6 +2,7 @@ package com.example.web_crawler.controller;
 
 import com.example.web_crawler.crawler.CrawlService;
 import com.example.web_crawler.model.Crawl;
+import com.example.web_crawler.model.CrawlKeyword;
 import com.example.web_crawler.model.Page;
 import com.example.web_crawler.model.PageKeyword;
 import com.example.web_crawler.repository.CrawlRepository;
@@ -91,6 +92,20 @@ public class PageController {
 
         return ResponseEntity.ok(
             pageKeywordRepository.findByPageId(id)
+        );
+    }
+
+    @GetMapping("/api/crawls/{id}/keywords")
+    @ResponseBody
+    public ResponseEntity<List<CrawlKeyword>> getCrawlKeywords(
+        @PathVariable long id
+    ) {
+        if (crawlRepository.findById(id).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(
+            pageKeywordRepository.findByCrawlId(id)
         );
     }
 }

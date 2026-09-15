@@ -1,6 +1,7 @@
 package com.example.web_crawler.repository.jdbc;
 
 import com.example.web_crawler.model.Crawl;
+import com.example.web_crawler.model.CrawlKeyword;
 import com.example.web_crawler.model.CrawlStatus;
 import com.example.web_crawler.model.Keyword;
 import com.example.web_crawler.model.Page;
@@ -162,5 +163,110 @@ class JdbcPageKeywordRepositoryTest {
                 null
             )
         );
+    }
+
+    @Test
+    void findsKeywordsAggregatedAcrossPagesInCrawl() {
+        Crawl crawl = crawlRepository.save(
+            new Crawl(
+                0L,
+                URI.create("https://example.com"),
+                2,
+                Duration.ofMinutes(5),
+                CrawlStatus.NOT_STARTED,
+                null,
+                null
+            )
+        );
+
+        Page firstPage = pageRepository.save(
+            new Page(
+                0L,
+                crawl.getId(),
+                URI.create("https://example.com/first"),
+                0,
+                PageStatus.DISCOVERED,
+                null,
+                null,
+                Instant.now(),
+                null,
+                null
+            )
+        );
+
+        Page secondPage = pageRepository.save(
+            new Page(
+                0L,
+                crawl.getId(),
+                URI.create("https://example.com/second"),
+                1,
+                PageStatus.DISCOVERED,
+                null,
+                null,
+                Instant.now(),
+                null,
+                null
+            )
+        );
+
+        Keyword java = keywordRepository.save(
+            new Keyword(0L, "java")
+        );
+
+        Keyword spring = keywordRepository.save(
+            new Keyword(0L, "spring")
+        );
+
+        pageKeywordRepository.save(
+            new PageKeyword(
+                firstPage.getId(),
+                java,
+                5,
+                0.5
+            )
+        );
+
+        pageKeywordRepository.save(
+            new PageKeyword(
+                firstPage.getId(),
+                spring,
+                3,
+                0.3
+            )
+        );
+
+        pageKeywordRepository.save(
+            new PageKeyword(
+                secondPage.getId(),
+                java,
+                7,
+                0.7
+            )
+        );
+
+        pageKeywordRepository.save(
+            new PageKeyword(
+                secondPage.getId(),
+                spring,
+                2,
+                0.2
+            )
+        );
+
+        List<CrawlKeyword> found =
+            pageKeywordRepository.findByCrawlId(crawl.getId());
+
+        assertEquals(2, found.size());
+
+        CrawlKeyword first = found.get(0);
+        CrawlKeyword second = found.get(1);
+
+        assertEquals("java", first.keyword().word());
+        assertEquals(12, first.frequency());
+        assertEquals(12.0 / 17.0, first.score(), 0.0001);
+
+        assertEquals("spring", second.keyword().word());
+        assertEquals(5, second.frequency());
+        assertEquals(5.0 / 17.0, second.score(), 0.0001);
     }
 }

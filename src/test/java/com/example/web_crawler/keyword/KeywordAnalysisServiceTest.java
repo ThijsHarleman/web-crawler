@@ -1,5 +1,6 @@
 package com.example.web_crawler.keyword;
 
+import com.example.web_crawler.model.CrawlKeyword;
 import com.example.web_crawler.model.Keyword;
 import com.example.web_crawler.model.PageKeyword;
 import com.example.web_crawler.repository.KeywordRepository;
@@ -155,6 +156,11 @@ class KeywordAnalysisServiceTest {
                     pageKeyword.pageId() == pageId
                 )
                 .toList();
+        }
+
+        @Override
+        public List<CrawlKeyword> findByCrawlId(long crawlId) {
+            return List.of();
         }
     }
 }

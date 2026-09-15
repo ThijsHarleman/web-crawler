@@ -1,8 +1,10 @@
 const form = document.getElementById("crawl-form");
 const statusElement = document.getElementById("crawl-status");
 const resultsElement = document.getElementById("crawl-results");
-const keywordResultsElement = document.getElementById("keyword-results");
-const keywordMessageElement = document.getElementById("keyword-message");
+const keywordAnalysisElement = document.getElementById("keyword-analysis");
+const wordCloudContainer = document.getElementById("word-cloud-container");
+const keywordTableElement = document.getElementById("keyword-table");
+const keywordTableContainer = document.getElementById("keyword-table-container");
 
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -34,13 +36,10 @@ form.addEventListener("submit", async (event) => {
         startPolling(crawl.id);
 
     } catch (error) {
-        statusElement.innerHTML = `
-            <h2>Crawl Status</h2>
-            <p>
-                Failed to start crawl:
-                ${error.message}
-            </p>
-        `;
+        renderCrawlStatusError(
+            "Failed to start crawl",
+            error
+        );
     }
 });
 
@@ -49,11 +48,41 @@ function renderCrawlStatus(crawl) {
 
     const heading = document.createElement("h2");
     heading.textContent = "Crawl Status";
+
     statusElement.appendChild(heading);
 
-    appendStatusValue(statusElement, "ID", crawl.id);
-    appendStatusValue(statusElement, "Status", crawl.status);
-    appendStatusValue(statusElement, "Start URL", crawl.startUrl);
+    appendStatusValue(
+        statusElement,
+        "ID",
+        crawl.id
+    );
+
+    appendStatusValue(
+        statusElement,
+        "Status",
+        crawl.status
+    );
+
+    appendStatusValue(
+        statusElement,
+        "Start URL",
+        crawl.startUrl
+    );
+}
+
+function renderCrawlStatusError(message, error) {
+    statusElement.innerHTML = "";
+
+    const heading = document.createElement("h2");
+    heading.textContent = "Crawl Status";
+
+    statusElement.appendChild(heading);
+
+    const paragraph = document.createElement("p");
+
+    paragraph.textContent = `${message}: ${error.message}`;
+
+    statusElement.appendChild(paragraph);
 }
 
 function appendStatusValue(container, label, value) {
@@ -84,6 +113,7 @@ function startPolling(crawlId) {
                 renderCrawlStatus(crawl);
 
                 await loadCrawlPages(crawlId);
+                await loadCrawlKeywords(crawlId);
 
                 if (
                     crawl.status === "COMPLETED" ||
@@ -96,13 +126,10 @@ function startPolling(crawlId) {
             } catch (error) {
                 clearInterval(intervalId);
 
-                statusElement.innerHTML = `
-                    <h2>Crawl Status</h2>
-                    <p>
-                        Failed to retrieve crawl status:
-                        ${error.message}
-                    </p>
-                `;
+                renderCrawlStatusError(
+                    "Failed to retrieve crawl status",
+                    error
+                );
             }
         },
         1000
@@ -125,7 +152,8 @@ function renderCrawlPages(pages) {
     resultsElement.innerHTML = "";
 
     const heading = document.createElement("h2");
-    heading.textContent = "Crawl Results";
+    heading.textContent = "Pages Discovered";
+
     resultsElement.appendChild(heading);
 
     if (pages.length === 0) {
@@ -167,7 +195,7 @@ function renderCrawlPages(pages) {
         appendCell(row, page.status);
         appendCell(row, page.httpStatusCode ?? "");
         appendCell(row, page.title ?? "");
-        appendPageLink(row, page);
+        appendCell(row, page.uri);
         appendCell(row, page.errorMessage ?? "");
 
         tbody.appendChild(row);
@@ -179,37 +207,15 @@ function renderCrawlPages(pages) {
 
 function appendCell(row, value) {
     const cell = document.createElement("td");
+
     cell.textContent = value;
+
     row.appendChild(cell);
 }
 
-function appendPageLink(row, page) {
-    const cell = document.createElement("td");
-
-    const link = document.createElement("button");
-    link.type = "button";
-    link.textContent = page.uri;
-
-    link.addEventListener("click", () => {
-        loadPageKeywords(page.id);
-    });
-
-    cell.appendChild(link);
-    row.appendChild(cell);
-}
-
-async function loadPageKeywords(pageId) {
-    keywordMessageElement.textContent = "Loading keywords...";
-
-    const cloudContainer = document.getElementById("word-cloud-container");
-
-    const tableContainer = document.getElementById("keyword-table-container");
-
-    cloudContainer.innerHTML = "";
-    tableContainer.innerHTML = "";
-
+async function loadCrawlKeywords(crawlId) {
     try {
-        const response = await fetch(`/api/pages/${pageId}/keywords`);
+        const response = await fetch(`/api/crawls/${crawlId}/keywords`);
 
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
@@ -217,48 +223,87 @@ async function loadPageKeywords(pageId) {
 
         const keywords = await response.json();
 
-        renderPageKeywords(keywords);
+        renderCrawlKeywords(keywords);
 
     } catch (error) {
-        keywordMessageElement.textContent = `Failed to load keywords: ${error.message}`;
+        renderKeywordError(error);
     }
 }
 
-function renderPageKeywords(keywords) {
-    const cloudContainer = document.getElementById("word-cloud-container");
-
-    const tableContainer = document.getElementById("keyword-table-container");
-
-    if (cloudContainer === null || tableContainer === null) {
+function renderCrawlKeywords(keywords) {
+    if (
+        keywordAnalysisElement === null ||
+        wordCloudContainer === null ||
+        keywordTableElement === null ||
+        keywordTableContainer === null
+    ) {
         throw new Error(
-            "Keyword visualization containers are missing from the page."
+            "Keyword analysis elements are missing from the page."
         );
     }
 
+    wordCloudContainer.innerHTML = "";
+    keywordTableContainer.innerHTML = "";
+
     if (keywords.length === 0) {
-        keywordMessageElement.textContent = "No keywords found for this page.";
+        renderNoKeywords();
 
         return;
     }
-
-    keywordMessageElement.textContent = `Showing ${keywords.length} keywords.`;
-
-    const canvas = document.createElement("canvas");
-    canvas.id = "word-cloud";
-
-    cloudContainer.appendChild(canvas);
 
     renderWordCloud(keywords);
     renderKeywordTable(keywords);
 }
 
+function renderNoKeywords() {
+    wordCloudContainer.innerHTML = "";
+
+    const message = document.createElement("p");
+
+    message.textContent = "No keywords discovered yet.";
+
+    wordCloudContainer.appendChild(message);
+
+    keywordTableContainer.innerHTML = "";
+
+    const tableMessage = document.createElement("p");
+
+    tableMessage.textContent = "No keywords discovered yet.";
+
+    keywordTableContainer.appendChild(tableMessage);
+}
+
+function renderKeywordError(error) {
+    wordCloudContainer.innerHTML = "";
+
+    const cloudMessage = document.createElement("p");
+
+    cloudMessage.textContent = `Failed to load keyword analysis: ${error.message}`;
+
+    wordCloudContainer.appendChild(cloudMessage);
+
+    keywordTableContainer.innerHTML = "";
+
+    const tableMessage = document.createElement("p");
+
+    tableMessage.textContent = "Keyword results are unavailable.";
+
+    keywordTableContainer.appendChild(tableMessage);
+}
+
 function renderWordCloud(keywords) {
-    const canvas = document.getElementById("word-cloud");
+    wordCloudContainer.innerHTML = "";
+
+    const canvas = document.createElement("canvas");
+
+    canvas.id = "word-cloud";
+
+    wordCloudContainer.appendChild(canvas);
 
     const wordCloudData = keywords.map(
-        (pageKeyword) => [
-            pageKeyword.keyword.word,
-            pageKeyword.frequency
+        (crawlKeyword) => [
+            crawlKeyword.keyword.word,
+            crawlKeyword.frequency
         ]
     );
 
@@ -274,9 +319,7 @@ function renderWordCloud(keywords) {
 }
 
 function renderKeywordTable(keywords) {
-    const tableContainer = document.getElementById(
-        "keyword-table-container"
-    );
+    keywordTableContainer.innerHTML = "";
 
     const table = document.createElement("table");
 
@@ -291,7 +334,9 @@ function renderKeywordTable(keywords) {
 
     for (const header of headers) {
         const cell = document.createElement("th");
+
         cell.textContent = header;
+
         headerRow.appendChild(cell);
     }
 
@@ -300,27 +345,17 @@ function renderKeywordTable(keywords) {
 
     const tbody = document.createElement("tbody");
 
-    for (const pageKeyword of keywords) {
+    for (const crawlKeyword of keywords) {
         const row = document.createElement("tr");
 
-        appendCell(
-            row,
-            pageKeyword.keyword.word
-        );
-
-        appendCell(
-            row,
-            pageKeyword.frequency
-        );
-
-        appendCell(
-            row,
-            pageKeyword.score.toFixed(4)
-        );
+        appendCell(row, crawlKeyword.keyword.word);
+        appendCell(row, crawlKeyword.frequency);
+        appendCell(row, crawlKeyword.score.toFixed(4));
 
         tbody.appendChild(row);
     }
 
     table.appendChild(tbody);
-    tableContainer.appendChild(table);
+
+    keywordTableContainer.appendChild(table);
 }

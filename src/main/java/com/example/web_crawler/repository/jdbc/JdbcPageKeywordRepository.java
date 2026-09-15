@@ -1,5 +1,6 @@
 package com.example.web_crawler.repository.jdbc;
 
+import com.example.web_crawler.model.CrawlKeyword;
 import com.example.web_crawler.model.Keyword;
 import com.example.web_crawler.model.PageKeyword;
 import com.example.web_crawler.repository.PageKeywordRepository;
@@ -64,6 +65,53 @@ public class JdbcPageKeywordRepository implements PageKeywordRepository {
             this::mapRow,
             pageId
         );
+    }
+
+    @Override
+    public List<CrawlKeyword> findByCrawlId(long crawlId) {
+        String sql = """
+            SELECT
+                k.id,
+                k.word,
+                SUM(pk.frequency) AS frequency
+            FROM page_keyword pk
+            JOIN keyword k
+                ON k.id = pk.keyword_id
+            JOIN page p
+                ON p.id = pk.page_id
+            WHERE p.crawl_id = ?
+            GROUP BY k.id, k.word
+            ORDER BY frequency DESC, k.word ASC
+            """;
+
+        List<CrawlKeyword> keywords = jdbcTemplate.query(
+            sql,
+            (resultSet, rowNum) -> new CrawlKeyword(
+                new Keyword(
+                    resultSet.getLong("id"),
+                    resultSet.getString("word")
+                ),
+                resultSet.getInt("frequency"),
+                0.0
+            ),
+            crawlId
+        );
+
+        int totalFrequency = keywords.stream()
+            .mapToInt(CrawlKeyword::frequency)
+            .sum();
+
+        if (totalFrequency == 0) {
+            return keywords;
+        }
+
+        return keywords.stream()
+            .map(keyword -> new CrawlKeyword(
+                keyword.keyword(),
+                keyword.frequency(),
+                (double) keyword.frequency() / totalFrequency
+            ))
+            .toList();
     }
 
     private PageKeyword mapRow(ResultSet resultSet, int rowNum)
