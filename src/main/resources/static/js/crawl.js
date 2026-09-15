@@ -2,6 +2,7 @@ const form = document.getElementById("crawl-form");
 const statusElement = document.getElementById("crawl-status");
 const resultsElement = document.getElementById("crawl-results");
 const keywordResultsElement = document.getElementById("keyword-results");
+const keywordMessageElement = document.getElementById("keyword-message");
 
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -198,10 +199,14 @@ function appendPageLink(row, page) {
 }
 
 async function loadPageKeywords(pageId) {
-    keywordResultsElement.innerHTML = `
-        <h2>Keyword Analysis</h2>
-        <p>Loading keywords...</p>
-    `;
+    keywordMessageElement.textContent = "Loading keywords...";
+
+    const cloudContainer = document.getElementById("word-cloud-container");
+
+    const tableContainer = document.getElementById("keyword-table-container");
+
+    cloudContainer.innerHTML = "";
+    tableContainer.innerHTML = "";
 
     try {
         const response = await fetch(`/api/pages/${pageId}/keywords`);
@@ -215,29 +220,63 @@ async function loadPageKeywords(pageId) {
         renderPageKeywords(keywords);
 
     } catch (error) {
-        keywordResultsElement.innerHTML = `
-            <h2>Keyword Analysis</h2>
-            <p>
-                Failed to load keywords:
-                ${error.message}
-            </p>
-        `;
+        keywordMessageElement.textContent = `Failed to load keywords: ${error.message}`;
     }
 }
 
 function renderPageKeywords(keywords) {
-    keywordResultsElement.innerHTML = "";
+    const cloudContainer = document.getElementById("word-cloud-container");
 
-    const heading = document.createElement("h2");
-    heading.textContent = "Keyword Analysis";
-    keywordResultsElement.appendChild(heading);
+    const tableContainer = document.getElementById("keyword-table-container");
+
+    if (cloudContainer === null || tableContainer === null) {
+        throw new Error(
+            "Keyword visualization containers are missing from the page."
+        );
+    }
 
     if (keywords.length === 0) {
-        const message = document.createElement("p");
-        message.textContent = "No keywords found for this page.";
-        keywordResultsElement.appendChild(message);
+        keywordMessageElement.textContent = "No keywords found for this page.";
+
         return;
     }
+
+    keywordMessageElement.textContent = `Showing ${keywords.length} keywords.`;
+
+    const canvas = document.createElement("canvas");
+    canvas.id = "word-cloud";
+
+    cloudContainer.appendChild(canvas);
+
+    renderWordCloud(keywords);
+    renderKeywordTable(keywords);
+}
+
+function renderWordCloud(keywords) {
+    const canvas = document.getElementById("word-cloud");
+
+    const wordCloudData = keywords.map(
+        (pageKeyword) => [
+            pageKeyword.keyword.word,
+            pageKeyword.frequency
+        ]
+    );
+
+    WordCloud(canvas, {
+        list: wordCloudData,
+        gridSize: 8,
+        weightFactor: 20,
+        minSize: 10,
+        rotateRatio: 0.2,
+        rotationSteps: 2,
+        backgroundColor: "white"
+    });
+}
+
+function renderKeywordTable(keywords) {
+    const tableContainer = document.getElementById(
+        "keyword-table-container"
+    );
 
     const table = document.createElement("table");
 
@@ -283,5 +322,5 @@ function renderPageKeywords(keywords) {
     }
 
     table.appendChild(tbody);
-    keywordResultsElement.appendChild(table);
+    tableContainer.appendChild(table);
 }
