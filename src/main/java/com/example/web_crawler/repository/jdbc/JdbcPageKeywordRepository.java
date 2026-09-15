@@ -82,6 +82,7 @@ public class JdbcPageKeywordRepository implements PageKeywordRepository {
             WHERE p.crawl_id = ?
             GROUP BY k.id, k.word
             ORDER BY frequency DESC, k.word ASC
+            LIMIT 100
             """;
 
         List<CrawlKeyword> keywords = jdbcTemplate.query(

@@ -6,6 +6,8 @@ const wordCloudContainer = document.getElementById("word-cloud-container");
 const keywordTableElement = document.getElementById("keyword-table");
 const keywordTableContainer = document.getElementById("keyword-table-container");
 
+let lastKeywordData = null;
+
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -223,6 +225,14 @@ async function loadCrawlKeywords(crawlId) {
 
         const keywords = await response.json();
 
+        const keywordData = JSON.stringify(keywords);
+
+        if (keywordData === lastKeywordData) {
+            return;
+        }
+
+        lastKeywordData = keywordData;
+
         renderCrawlKeywords(keywords);
 
     } catch (error) {
@@ -295,10 +305,15 @@ function renderWordCloud(keywords) {
     wordCloudContainer.innerHTML = "";
 
     const canvas = document.createElement("canvas");
-
     canvas.id = "word-cloud";
 
     wordCloudContainer.appendChild(canvas);
+
+    const width = wordCloudContainer.offsetWidth;
+    const height = wordCloudContainer.offsetHeight;
+
+    canvas.width = width;
+    canvas.height = height;
 
     const wordCloudData = keywords.map(
         (crawlKeyword) => [
@@ -307,14 +322,36 @@ function renderWordCloud(keywords) {
         ]
     );
 
+    const maxFrequency = Math.max(
+        ...keywords.map(
+            (crawlKeyword) => crawlKeyword.frequency
+        )
+    );
+
+    const maxFontSize = 60;
+    const minFontSize = 12;
+
+    const weightFactor = (frequency) => {
+        if (maxFrequency === 0) {
+            return minFontSize;
+        }
+
+        return Math.max(
+            minFontSize,
+            (frequency / maxFrequency) * maxFontSize
+        );
+    };
+
     WordCloud(canvas, {
         list: wordCloudData,
         gridSize: 8,
-        weightFactor: 20,
-        minSize: 10,
+        weightFactor: weightFactor,
+        minSize: minFontSize,
         rotateRatio: 0.2,
         rotationSteps: 2,
-        backgroundColor: "white"
+        backgroundColor: "white",
+        drawOutOfBound: false,
+        shrinkToFit: true
     });
 }
 

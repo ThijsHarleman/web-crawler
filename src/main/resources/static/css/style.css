@@ -73,7 +73,6 @@ td:last-child {
     max-width: 1000px;
     height: 500px;
     margin-top: 1rem;
-    border: 1px solid #ccc;
 }
 
 #word-cloud {

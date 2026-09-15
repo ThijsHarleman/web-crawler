@@ -269,4 +269,75 @@ class JdbcPageKeywordRepositoryTest {
         assertEquals(5, second.frequency());
         assertEquals(5.0 / 17.0, second.score(), 0.0001);
     }
+
+    @Test
+    void limitsCrawlKeywordsToTop100() {
+        Crawl crawl = crawlRepository.save(
+            new Crawl(
+                0L,
+                URI.create("https://example.com"),
+                2,
+                Duration.ofMinutes(5),
+                CrawlStatus.NOT_STARTED,
+                null,
+                null
+            )
+        );
+
+        Page page = pageRepository.save(
+            new Page(
+                0L,
+                crawl.getId(),
+                URI.create("https://example.com/page"),
+                0,
+                PageStatus.DISCOVERED,
+                null,
+                null,
+                Instant.now(),
+                null,
+                null
+            )
+        );
+
+        for (int i = 1; i <= 101; i++) {
+            Keyword keyword = keywordRepository.save(
+                new Keyword(0L, "keyword" + i)
+            );
+
+            pageKeywordRepository.save(
+                new PageKeyword(
+                    page.getId(),
+                    keyword,
+                    i,
+                    i
+                )
+            );
+        }
+
+        List<CrawlKeyword> found = pageKeywordRepository.findByCrawlId(
+            crawl.getId()
+        );
+
+        assertEquals(100, found.size());
+
+        assertEquals(
+            "keyword101",
+            found.get(0).keyword().word()
+        );
+
+        assertEquals(
+            101,
+            found.get(0).frequency()
+        );
+
+        assertEquals(
+            "keyword2",
+            found.get(99).keyword().word()
+        );
+
+        assertEquals(
+            2,
+            found.get(99).frequency()
+        );
+    }
 }
