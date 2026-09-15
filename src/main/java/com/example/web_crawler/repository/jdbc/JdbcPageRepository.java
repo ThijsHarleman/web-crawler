@@ -10,6 +10,7 @@ import java.net.URI;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -56,7 +57,7 @@ public class JdbcPageRepository implements PageRepository {
     }
 
     @Override
-    public boolean existsByCrawlIdAndUri(long crawlId, String uri) {
+    public boolean existsByCrawlIdAndUri(long crawlId, URI uri) {
         String sql = """
             SELECT EXISTS(
                 SELECT 1
@@ -74,6 +75,32 @@ public class JdbcPageRepository implements PageRepository {
         );
 
         return Boolean.TRUE.equals(exists);
+    }
+
+    @Override
+    public List<Page> findByCrawlId(long crawlId) {
+        String sql = """
+            SELECT
+                id,
+                crawl_id,
+                uri,
+                depth,
+                status,
+                http_status_code,
+                title,
+                discovered_at,
+                crawled_at,
+                error_message
+            FROM page
+            WHERE crawl_id = ?
+            ORDER BY id
+            """;
+
+        return jdbcTemplate.query(
+            sql,
+            this::mapRow,
+            crawlId
+        );
     }
 
     private Page insert(Page page) {

@@ -1,0 +1,56 @@
+body {
+    font-family: sans-serif;
+    margin: 2rem;
+}
+
+main {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+form {
+    display: grid;
+    gap: 1rem;
+    max-width: 500px;
+    margin-bottom: 2rem;
+}
+
+form div {
+    display: grid;
+    gap: 0.25rem;
+}
+
+input,
+button {
+    font: inherit;
+    padding: 0.5rem;
+}
+
+button {
+    cursor: pointer;
+}
+
+section {
+    margin-top: 2rem;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+th,
+td {
+    text-align: left;
+    padding: 0.6rem;
+    border: 1px solid #ccc;
+}
+
+th {
+    font-weight: bold;
+}
+
+td:last-child {
+    overflow-wrap: anywhere;
+}

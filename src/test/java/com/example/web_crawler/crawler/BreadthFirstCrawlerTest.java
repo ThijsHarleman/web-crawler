@@ -485,7 +485,7 @@ class BreadthFirstCrawlerTest {
         @Override
         public boolean existsByCrawlIdAndUri(
             long crawlId,
-            String uri
+            URI uri
         ) {
             return savedPages.stream()
                 .anyMatch(page ->
@@ -504,6 +504,13 @@ class BreadthFirstCrawlerTest {
                 .reduce(
                     (first, second) -> second
                 );
+        }
+
+        @Override
+        public List<Page> findByCrawlId(long crawlId) {
+            return savedPages.stream()
+                .filter(page -> page.getCrawlId() == crawlId)
+                .toList();
         }
     }
 

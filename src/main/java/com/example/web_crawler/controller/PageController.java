@@ -2,25 +2,31 @@ package com.example.web_crawler.controller;
 
 import com.example.web_crawler.crawler.CrawlService;
 import com.example.web_crawler.model.Crawl;
+import com.example.web_crawler.model.Page;
 import com.example.web_crawler.repository.CrawlRepository;
+import com.example.web_crawler.repository.PageRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 import java.time.Duration;
 
 @Controller
 public class PageController {
     private final CrawlService crawlService;
     private final CrawlRepository crawlRepository;
+    private final PageRepository pageRepository;
 
     public PageController(
         CrawlService crawlService,
-        CrawlRepository crawlRepository
+        CrawlRepository crawlRepository,
+        PageRepository pageRepository
     ) {
         this.crawlService = crawlService;
         this.crawlRepository = crawlRepository;
+        this.pageRepository = pageRepository;
     }
 
     @GetMapping("/")
@@ -53,5 +59,19 @@ public class PageController {
             .orElseGet(
                 () -> ResponseEntity.notFound().build()
             );
+    }
+
+    @GetMapping("/api/crawls/{id}/pages")
+    @ResponseBody
+    public ResponseEntity<List<Page>> getPages(
+        @PathVariable long id
+    ) {
+        if (crawlRepository.findById(id).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(
+            pageRepository.findByCrawlId(id)
+        );
     }
 }

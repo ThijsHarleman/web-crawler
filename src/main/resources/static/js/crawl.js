@@ -1,5 +1,6 @@
 const form = document.getElementById("crawl-form");
 const statusElement = document.getElementById("crawl-status");
+const resultsElement = document.getElementById("crawl-results");
 
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -42,43 +43,45 @@ form.addEventListener("submit", async (event) => {
 });
 
 function renderCrawlStatus(crawl) {
-    statusElement.innerHTML = `
-        <h2>Crawl Status</h2>
+    statusElement.innerHTML = "";
 
-        <p>
-            <strong>ID:</strong>
-            ${crawl.id}
-        </p>
+    const heading = document.createElement("h2");
+    heading.textContent = "Crawl Status";
+    statusElement.appendChild(heading);
 
-        <p>
-            <strong>Status:</strong>
-            ${crawl.status}
-        </p>
+    appendStatusValue(statusElement, "ID", crawl.id);
+    appendStatusValue(statusElement, "Status", crawl.status);
+    appendStatusValue(statusElement, "Start URL", crawl.startUrl);
+}
 
-        <p>
-            <strong>Start URL:</strong>
-            ${crawl.startUrl}
-        </p>
-    `;
+function appendStatusValue(container, label, value) {
+    const paragraph = document.createElement("p");
+
+    const strong = document.createElement("strong");
+    strong.textContent = `${label}:`;
+
+    paragraph.appendChild(strong);
+    paragraph.append(` ${value}`);
+
+    container.appendChild(paragraph);
 }
 
 function startPolling(crawlId) {
     const intervalId = setInterval(
         async () => {
             try {
-                const response = await fetch(
-                    `/api/crawls/${crawlId}`
-                );
+                const response = await fetch(`/api/crawls/${crawlId}`);
 
                 if (!response.ok) {
                     clearInterval(intervalId);
                     return;
                 }
 
-                const crawl =
-                    await response.json();
+                const crawl = await response.json();
 
                 renderCrawlStatus(crawl);
+
+                await loadCrawlPages(crawlId);
 
                 if (
                     crawl.status === "COMPLETED" ||
@@ -102,4 +105,78 @@ function startPolling(crawlId) {
         },
         1000
     );
+}
+
+async function loadCrawlPages(crawlId) {
+    const response = await fetch(`/api/crawls/${crawlId}/pages`);
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+    }
+
+    const pages = await response.json();
+
+    renderCrawlPages(pages);
+}
+
+function renderCrawlPages(pages) {
+    resultsElement.innerHTML = "";
+
+    const heading = document.createElement("h2");
+    heading.textContent = "Crawl Results";
+    resultsElement.appendChild(heading);
+
+    if (pages.length === 0) {
+        const message = document.createElement("p");
+        message.textContent = "No pages discovered yet.";
+        resultsElement.appendChild(message);
+        return;
+    }
+
+    const table = document.createElement("table");
+
+    const thead = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+
+    const headers = [
+        "Depth",
+        "Status",
+        "HTTP",
+        "Title",
+        "URL",
+        "Error"
+    ];
+
+    for (const header of headers) {
+        const cell = document.createElement("th");
+        cell.textContent = header;
+        headerRow.appendChild(cell);
+    }
+
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+
+    for (const page of pages) {
+        const row = document.createElement("tr");
+
+        appendCell(row, page.depth);
+        appendCell(row, page.status);
+        appendCell(row, page.httpStatusCode ?? "");
+        appendCell(row, page.title ?? "");
+        appendCell(row, page.uri);
+        appendCell(row, page.errorMessage ?? "");
+
+        tbody.appendChild(row);
+    }
+
+    table.appendChild(tbody);
+    resultsElement.appendChild(table);
+}
+
+function appendCell(row, value) {
+    const cell = document.createElement("td");
+    cell.textContent = value;
+    row.appendChild(cell);
 }

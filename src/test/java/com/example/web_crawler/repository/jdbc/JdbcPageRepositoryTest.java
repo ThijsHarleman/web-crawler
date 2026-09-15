@@ -141,7 +141,7 @@ class JdbcPageRepositoryTest {
         assertTrue(
             pageRepository.existsByCrawlIdAndUri(
                 saved.getCrawlId(),
-                saved.getUri().toString()
+                saved.getUri()
             )
         );
     }
@@ -166,7 +166,7 @@ class JdbcPageRepositoryTest {
         assertFalse(
             pageRepository.existsByCrawlIdAndUri(
                 999L,
-                saved.getUri().toString()
+                saved.getUri()
             )
         );
     }

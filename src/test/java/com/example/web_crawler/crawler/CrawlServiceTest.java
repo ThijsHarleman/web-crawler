@@ -245,9 +245,14 @@ class CrawlServiceTest {
             @Override
             public boolean existsByCrawlIdAndUri(
                 long crawlId,
-                String uri
+                URI uri
             ) {
                 return false;
+            }
+
+            @Override
+            public List<Page> findByCrawlId(long crawlId) {
+                return List.of();
             }
         };
 
@@ -364,7 +369,7 @@ class CrawlServiceTest {
         @Override
         public boolean existsByCrawlIdAndUri(
             long crawlId,
-            String uri
+            URI uri
         ) {
             return savedPages.stream()
                 .anyMatch(page ->
@@ -373,6 +378,13 @@ class CrawlServiceTest {
                             .toString()
                             .equals(uri)
                 );
+        }
+
+        @Override
+        public List<Page> findByCrawlId(long crawlId) {
+            return savedPages.stream()
+                .filter(page -> page.getCrawlId() == crawlId)
+                .toList();
         }
 
         private List<Page> getSavedPages() {
