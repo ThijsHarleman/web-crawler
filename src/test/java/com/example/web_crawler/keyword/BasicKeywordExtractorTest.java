@@ -3,12 +3,22 @@ package com.example.web_crawler.keyword;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BasicKeywordExtractorTest {
-    private final KeywordExtractor extractor = new BasicKeywordExtractor();
+    private final StopWordProvider stopWordProvider = language -> Set.of(
+        "the",
+        "and",
+        "is"
+    );
+
+    private final BasicKeywordExtractor extractor = new BasicKeywordExtractor(
+        stopWordProvider
+    );
 
     @Test
     void extractsWordFrequencies() {
@@ -27,7 +37,7 @@ class BasicKeywordExtractorTest {
 
     @Test
     void ignoresStopWords() {
-        String text = "the and for are this that with from";
+        String text = "the is and";
 
         Map<String, Integer> result = extractor.extract(text);
 
@@ -94,5 +104,37 @@ class BasicKeywordExtractorTest {
             200,
             result.get("popular")
         );
+    }
+
+    @Test
+    void ignoresNumbers() {
+        Map<String, Integer> result = extractor.extract(
+            "2025 2025 2024 123 artificial intelligence"
+        );
+
+        assertFalse(result.containsKey("2025"));
+        assertFalse(result.containsKey("2024"));
+        assertFalse(result.containsKey("123"));
+
+        assertEquals(
+            1,
+            result.get("artificial")
+        );
+
+        assertEquals(
+            1,
+            result.get("intelligence")
+        );
+    }
+
+    @Test
+    void keepsWordsThatContainNumbers() {
+        Map<String, Integer> result = extractor.extract(
+            "gpt4 gpt4 html5 ipv6"
+        );
+
+        assertEquals(2, result.get("gpt4"));
+        assertEquals(1, result.get("html5"));
+        assertEquals(1, result.get("ipv6"));
     }
 }

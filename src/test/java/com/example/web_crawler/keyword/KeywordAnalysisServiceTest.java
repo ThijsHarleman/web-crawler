@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -21,9 +22,11 @@ class KeywordAnalysisServiceTest {
 
         InMemoryPageKeywordRepository pageKeywordRepository = 
             new InMemoryPageKeywordRepository();
+        
+        StopWordProvider stopWordProvider = language -> Set.of();
 
         KeywordAnalysisService service = new DefaultKeywordAnalysisService(
-            new BasicKeywordExtractor(),
+            new BasicKeywordExtractor(stopWordProvider),
             keywordRepository,
             pageKeywordRepository
         );
@@ -70,16 +73,18 @@ class KeywordAnalysisServiceTest {
 
         InMemoryPageKeywordRepository pageKeywordRepository = 
             new InMemoryPageKeywordRepository();
+        
+        StopWordProvider stopWordProvider = language -> Set.of();
 
         KeywordAnalysisService service = new DefaultKeywordAnalysisService(
-            new BasicKeywordExtractor(),
+            new BasicKeywordExtractor(stopWordProvider),
             keywordRepository,
             pageKeywordRepository
         );
 
         service.analyze(
             42L,
-            "the and for"
+            ""
         );
 
         assertTrue(
