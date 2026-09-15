@@ -7,6 +7,7 @@ public record ParsedPage(
     URI uri,
     String title,
     String text,
-    List<String> links
+    List<String> links,
+    String language
 ) {
 }

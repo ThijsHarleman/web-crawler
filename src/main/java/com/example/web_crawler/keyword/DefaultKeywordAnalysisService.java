@@ -30,12 +30,13 @@ public class DefaultKeywordAnalysisService implements KeywordAnalysisService {
     }
 
     @Override
-    public void analyze(long pageId, String text) {
+    public void analyze(long pageId, String text, String language) {
         logger.info(
             "Analyzing keywords for page {}",
             pageId
         );
-        Map<String, Integer> frequencies = keywordExtractor.extract(text);
+        Map<String, Integer> frequencies = 
+            keywordExtractor.extract(text, language);
 
         logger.info(
             "Extracted {} unique keywords for page {}",

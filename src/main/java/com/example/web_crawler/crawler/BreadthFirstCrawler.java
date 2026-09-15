@@ -198,7 +198,8 @@ public class BreadthFirstCrawler {
 
                 keywordAnalysisService.analyze(
                     savedPage.getId(),
-                    parsedPage.text()
+                    parsedPage.text(),
+                    parsedPage.language()
                 );
 
                 logger.info(

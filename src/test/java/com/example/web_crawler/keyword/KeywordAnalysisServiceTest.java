@@ -33,7 +33,8 @@ class KeywordAnalysisServiceTest {
 
         service.analyze(
             42L,
-            "Java Java Spring Spring Spring crawler"
+            "Java Java Spring Spring Spring crawler",
+            "en"
         );
 
         assertEquals(3, pageKeywordRepository.saved.size());
@@ -84,6 +85,7 @@ class KeywordAnalysisServiceTest {
 
         service.analyze(
             42L,
+            "",
             ""
         );
 

@@ -22,13 +22,16 @@ public class BasicKeywordExtractor implements KeywordExtractor {
         this.stopWordProvider = stopWordProvider;
     }
 
-@Override
-    public Map<String, Integer> extract(String text) {
+    @Override
+    public Map<String, Integer> extract(
+        String text,
+        String language
+    ) {
         if (text == null || text.isBlank()) {
             return Map.of();
         }
 
-        Set<String> stopWords = stopWordProvider.getStopWords("en");
+        Set<String> stopWords = stopWordProvider.getStopWords(language);
 
         Map<String, Integer> frequencies = new HashMap<>();
 

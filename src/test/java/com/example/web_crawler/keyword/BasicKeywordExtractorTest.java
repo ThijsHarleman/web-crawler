@@ -27,7 +27,7 @@ class BasicKeywordExtractorTest {
             Spring is also great.
             """;
 
-        Map<String, Integer> result = extractor.extract(text);
+        Map<String, Integer> result = extractor.extract(text, "en");
 
         assertEquals(2, result.get("java"));
         assertEquals(2, result.get("great"));
@@ -39,7 +39,7 @@ class BasicKeywordExtractorTest {
     void ignoresStopWords() {
         String text = "the is and";
 
-        Map<String, Integer> result = extractor.extract(text);
+        Map<String, Integer> result = extractor.extract(text, "en");
 
         assertTrue(result.isEmpty());
     }
@@ -48,7 +48,7 @@ class BasicKeywordExtractorTest {
     void ignoresShortWords() {
         String text = "a an is to be it java web";
 
-        Map<String, Integer> result = extractor.extract(text);
+        Map<String, Integer> result = extractor.extract(text, "en");
 
         assertEquals(
             Map.of("java", 1, "web", 1),
@@ -60,7 +60,7 @@ class BasicKeywordExtractorTest {
     void handlesPunctuationAndCase() {
         String text = "Java, JAVA! java? Spring.";
 
-        Map<String, Integer> result = extractor.extract(text);
+        Map<String, Integer> result = extractor.extract(text, "en");
 
         assertEquals(3, result.get("java"));
         assertEquals(1, result.get("spring"));
@@ -69,18 +69,18 @@ class BasicKeywordExtractorTest {
     @Test
     void handlesBlankText() {
         assertTrue(
-            extractor.extract("").isEmpty()
+            extractor.extract("", "en").isEmpty()
         );
 
         assertTrue(
-            extractor.extract("   ").isEmpty()
+            extractor.extract("   ", "en").isEmpty()
         );
     }
 
     @Test
     void handlesNullText() {
         assertTrue(
-            extractor.extract(null).isEmpty()
+            extractor.extract(null, "en").isEmpty()
         );
     }
 
@@ -96,7 +96,10 @@ class BasicKeywordExtractorTest {
 
         text.append("popular ".repeat(200));
 
-        Map<String, Integer> result = extractor.extract(text.toString());
+        Map<String, Integer> result = extractor.extract(
+            text.toString(),
+            "en"
+        );
 
         assertEquals(100, result.size());
 
@@ -109,7 +112,8 @@ class BasicKeywordExtractorTest {
     @Test
     void ignoresNumbers() {
         Map<String, Integer> result = extractor.extract(
-            "2025 2025 2024 123 artificial intelligence"
+            "2025 2025 2024 123 artificial intelligence",
+            "en"
         );
 
         assertFalse(result.containsKey("2025"));
@@ -130,7 +134,8 @@ class BasicKeywordExtractorTest {
     @Test
     void keepsWordsThatContainNumbers() {
         Map<String, Integer> result = extractor.extract(
-            "gpt4 gpt4 html5 ipv6"
+            "gpt4 gpt4 html5 ipv6",
+            "en"
         );
 
         assertEquals(2, result.get("gpt4"));

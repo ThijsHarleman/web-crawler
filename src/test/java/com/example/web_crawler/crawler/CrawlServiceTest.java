@@ -2,6 +2,7 @@ package com.example.web_crawler.crawler;
 
 import com.example.web_crawler.fetch.FetchResult;
 import com.example.web_crawler.fetch.PageFetcher;
+import com.example.web_crawler.keyword.HtmlPageLanguageDetector;
 import com.example.web_crawler.keyword.KeywordAnalysisService;
 import com.example.web_crawler.model.Crawl;
 import com.example.web_crawler.model.CrawlStatus;
@@ -50,7 +51,7 @@ class CrawlServiceTest {
             pageFetcher
         );
 
-        KeywordAnalysisService keywordAnalysisService = (pageId, text) -> {};
+        KeywordAnalysisService keywordAnalysisService = (pageId, text, language) -> {};
 
         Clock clock = Clock.fixed(
             START_TIME,
@@ -63,7 +64,7 @@ class CrawlServiceTest {
                 pageRepository,
                 robotsPolicyFetcher,
                 pageFetcher,
-                new HtmlPageParser(),
+                new HtmlPageParser(new HtmlPageLanguageDetector()),
                 new UrlNormalizer(),
                 keywordAnalysisService,
                 clock
@@ -125,7 +126,7 @@ class CrawlServiceTest {
             pageFetcher
         );
 
-        KeywordAnalysisService keywordAnalysisService = (pageId, text) -> {};
+        KeywordAnalysisService keywordAnalysisService = (pageId, text, language) -> {};
 
         BreadthFirstCrawlerFactory crawlerFactory =
             new BreadthFirstCrawlerFactory(
@@ -133,7 +134,7 @@ class CrawlServiceTest {
                 pageRepository,
                 robotsPolicyFetcher,
                 pageFetcher,
-                new HtmlPageParser(),
+                new HtmlPageParser(new HtmlPageLanguageDetector()),
                 new UrlNormalizer(),
                 keywordAnalysisService,
                 clock
@@ -190,7 +191,7 @@ class CrawlServiceTest {
             pageFetcher
         );
 
-        KeywordAnalysisService keywordAnalysisService = (pageId, text) -> {};
+        KeywordAnalysisService keywordAnalysisService = (pageId, text, language) -> {};
 
         BreadthFirstCrawlerFactory crawlerFactory =
             new BreadthFirstCrawlerFactory(
@@ -198,7 +199,7 @@ class CrawlServiceTest {
                 pageRepository,
                 robotsPolicyFetcher,
                 pageFetcher,
-                new HtmlPageParser(),
+                new HtmlPageParser(new HtmlPageLanguageDetector()),
                 new UrlNormalizer(),
                 keywordAnalysisService,
                 clock
@@ -282,7 +283,7 @@ class CrawlServiceTest {
             pageFetcher
         );
 
-        KeywordAnalysisService keywordAnalysisService = (pageId, text) -> {};
+        KeywordAnalysisService keywordAnalysisService = (pageId, text, language) -> {};
 
         BreadthFirstCrawlerFactory crawlerFactory =
             new BreadthFirstCrawlerFactory(
@@ -290,7 +291,7 @@ class CrawlServiceTest {
                 pageRepository,
                 robotsPolicyFetcher,
                 pageFetcher,
-                new HtmlPageParser(),
+                new HtmlPageParser(new HtmlPageLanguageDetector()),
                 new UrlNormalizer(),
                 keywordAnalysisService,
                 clock

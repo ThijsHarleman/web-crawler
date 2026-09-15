@@ -3,6 +3,7 @@ package com.example.web_crawler.crawler;
 import com.example.web_crawler.fetch.FetchResult;
 import com.example.web_crawler.fetch.PageFetchException;
 import com.example.web_crawler.fetch.PageFetcher;
+import com.example.web_crawler.keyword.HtmlPageLanguageDetector;
 import com.example.web_crawler.keyword.KeywordAnalysisService;
 import com.example.web_crawler.model.Crawl;
 import com.example.web_crawler.model.CrawlStatus;
@@ -445,7 +446,8 @@ class BreadthFirstCrawlerTest {
 
         verify(keywordAnalysisService).analyze(
             0L,
-            "Java Java Spring crawler"
+            "Java Java Spring crawler",
+            "en"
         );
     }
 
@@ -455,7 +457,7 @@ class BreadthFirstCrawlerTest {
             pageRepository,
             robotsPolicyProvider,
             pageFetcher,
-            new HtmlPageParser(),
+            new HtmlPageParser(new HtmlPageLanguageDetector()),
             new UrlNormalizer(),
             keywordAnalysisService,
             clock
