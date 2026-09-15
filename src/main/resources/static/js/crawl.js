@@ -8,6 +8,8 @@ const keywordTableContainer = document.getElementById("keyword-table-container")
 
 let lastKeywordData = null;
 
+const WORD_CLOUD_SCALE_EXPONENT = 0.6;
+
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -252,7 +254,6 @@ function renderCrawlKeywords(keywords) {
         );
     }
 
-    wordCloudContainer.innerHTML = "";
     keywordTableContainer.innerHTML = "";
 
     if (keywords.length === 0) {
@@ -302,18 +303,19 @@ function renderKeywordError(error) {
 }
 
 function renderWordCloud(keywords) {
-    wordCloudContainer.innerHTML = "";
-
-    const canvas = document.createElement("canvas");
-    canvas.id = "word-cloud";
-
-    wordCloudContainer.appendChild(canvas);
-
     const width = wordCloudContainer.offsetWidth;
     const height = wordCloudContainer.offsetHeight;
 
+    wordCloudContainer.innerHTML = "";
+
+    const canvas = document.createElement("canvas");
+
+    canvas.id = "word-cloud";
+
     canvas.width = width;
     canvas.height = height;
+
+    wordCloudContainer.appendChild(canvas);
 
     const wordCloudData = keywords.map(
         (crawlKeyword) => [
@@ -332,13 +334,19 @@ function renderWordCloud(keywords) {
     const minFontSize = 12;
 
     const weightFactor = (frequency) => {
-        if (maxFrequency === 0) {
-            return minFontSize;
+        if (maxFrequency <= 1) {
+            return maxFontSize;
         }
 
-        return Math.max(
-            minFontSize,
-            (frequency / maxFrequency) * maxFontSize
+        const scaledFrequency = Math.pow(
+            frequency / maxFrequency,
+            WORD_CLOUD_SCALE_EXPONENT
+        );
+
+        return (
+            minFontSize
+            + scaledFrequency
+            * (maxFontSize - minFontSize)
         );
     };
 
